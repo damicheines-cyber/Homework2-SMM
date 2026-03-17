@@ -2,7 +2,7 @@
 
 # Team Task Checklist
 
-## Person 1 — Exercise 1 + Node Logic
+## Eya — Exercise 1 + Node Logic
 
 * [ ] **Exercise 1:** Update function scoping (`public`, `private`, `internal`, `external`) and add justification comments.
 * [ ] Create **Node.sol basic structure**.
@@ -11,7 +11,7 @@
 * [ ] Implement block functions: `propose_block()`, `check_block()`, `finalize_block()`.
 * [ ] Implement overloaded `propagate(address proposer, Block block)`.
 
-## Person 2 — Exercise 2A + VRF
+## Lou — Exercise 2A + VRF
 
 * [ ] Create **Assigner.sol** contract.
 * [ ] Implement node registration `registerNode()`.
@@ -22,7 +22,7 @@
 * [ ] Select proposer using `random % nodes.length`.
 * [ ] Store proposer in `currentProposer`.
 
-## Person 3 — Consensus + Staking
+## Inès — Consensus + Staking
 
 * [ ] Create **Staking.sol** contract.
 * [ ] Require **minimum funding on deployment**.
