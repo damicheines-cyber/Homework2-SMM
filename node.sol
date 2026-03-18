@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.31;
+pragma solidity 0.8.30;
 
 import "./consensus.sol";
 import "./blockchain.sol";
+import "./Staking.sol";
+import "./Assigner.sol";
+
 
 // Inherits both the blockchain and consensus mechanism
 // This is because in reality, each validator has its own copy of the blockchain and consensus engine
 contract Node is Blockchain, Consensus{
+    Staking public staking;
+    Assigner public assigner;
     //string public current_message;
     //uint public current_block_quorum;
     //Block public current_block;
@@ -16,7 +21,16 @@ contract Node is Blockchain, Consensus{
     
     /// @dev this function starts the genesis block and manually loads some peers, letting the peers know about the in the process
     /// check out what payable does
-    constructor(address[] memory list_of_addresses, string memory message) Blockchain(message){
+    constructor(
+        address[] memory list_of_addresses,
+        string memory message,
+        address _staking,
+        address _assigner
+    ) Blockchain(message) {
+
+        staking = Staking(_staking);
+        assigner = Assigner(_assigner);
+
         uint i = list_of_addresses.length;
         while (i>0){
             // Get an address from the list
@@ -27,7 +41,7 @@ contract Node is Blockchain, Consensus{
 
             //Now let the peers know about the existence of this node
             Node(target).add_peer(address(this));
-            
+
             //Move onto next address
             i--;
         }
@@ -45,31 +59,49 @@ contract Node is Blockchain, Consensus{
     }
 
     // Validators are able to build and propose the next block on the chain.
-    function propose_block() external {
+    function propose_block() external payable {
 
-        // Request all peers for approval, gain quorum
-        uint length = current_validator_nodes.length;
-        for (uint i = 0; i < length; i++){
-            address peer = current_validator_nodes[i];
-            current_block_quorum += Node(peer).check_block(current_block);
-        }
+    // Only selected proposer can propose
+    require(msg.sender == assigner.getCurrentProposer(), "Not selected proposer");
+
+    // Require staking
+    require(msg.value >= 1 ether, "Stake required");
+
+    staking.stake{value: msg.value}();
+
+    // Request all peers for approval, gain quorum
+    uint length = current_validator_nodes.length;
+    for (uint i = 0; i < length; i++){
+        address peer = current_validator_nodes[i];
+        current_block_quorum += Node(peer).check_block(current_block);
+    }
     }
 
     // When blocks receive the required amount of approvals, they are added to the blockchain
     //function check_block_finality_and_build() public {
     function check_block_finality_and_build() external { //We changed check_block_finality_and_build from public to external because the function is intended to be triggered from outside the contract and is not called internally, and the modification allows it to remain callable by users while being slightly more efficient than public visibility, which we need because this function serves as an external entry point for finalizing the block after quorum is reached
-        // Check quorum
-        if(current_block_quorum==quorum){
+        uint totalNodes = current_validator_nodes.length;
+        // Check quorum: 2/3 rule
+        if(current_block_quorum * 3 >= totalNodes * 2){
             // Add block to the chain
             blockchain.push(current_block);
             next_block_num++;
+
+            // Reward proposer
+            staking.releaseStake(assigner.getCurrentProposer());
+
             // Inform other Nodes to finalize this block
             uint length = current_validator_nodes.length;
             for(uint i = 0; i < length; i++ ){
                 Node(current_validator_nodes[i]).finalize_block(current_block);
             }
+
+        } else {
+            // Slash proposer
+            staking.slashStake(assigner.getCurrentProposer());
         }
     }
+
 
     // Other nodes may send the finalize block command.
     // Check if the block conforms to th blockchain and add block

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.31;
+pragma solidity ^0.8.30;
 
 contract Consensus{
     //address[] public current_validator_nodes;

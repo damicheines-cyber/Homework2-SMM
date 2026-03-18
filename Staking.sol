@@ -12,11 +12,6 @@ contract Staking {
     event Released(address user, uint amount);
     event Slashed(address user);
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        _;
-    }
-
     constructor() payable {
         owner = msg.sender;
         require(msg.value >= minimumStake, "Minimum funding required");
@@ -29,7 +24,7 @@ contract Staking {
         emit Staked(msg.sender, msg.value);
     }
 
-    function releaseStake(address proposer) public onlyOwner {
+    function releaseStake(address proposer) public {
 
         uint amount = stakes[proposer];
         require(amount > 0, "No stake found");
@@ -40,7 +35,7 @@ contract Staking {
         emit Released(proposer, amount);
     }
 
-    function slashStake(address proposer) public onlyOwner {
+    function slashStake(address proposer) public {
         stakes[proposer] = 0;
         emit Slashed(proposer);
     }

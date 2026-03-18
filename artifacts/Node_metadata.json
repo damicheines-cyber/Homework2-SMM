@@ -1,0 +1,250 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "list_of_addresses",
+						"type": "address[]"
+					},
+					{
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "_staking",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "_assigner",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "peer",
+						"type": "address"
+					}
+				],
+				"name": "add_peer",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "assigner",
+				"outputs": [
+					{
+						"internalType": "contract Assigner",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"components": [
+							{
+								"internalType": "bytes32",
+								"name": "hash",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "bytes32",
+								"name": "prevHash",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "blockNum",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "message",
+								"type": "string"
+							}
+						],
+						"internalType": "struct Blockchain.Block",
+						"name": "proposed_block",
+						"type": "tuple"
+					}
+				],
+				"name": "check_block",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "check_block_finality_and_build",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"components": [
+							{
+								"internalType": "bytes32",
+								"name": "hash",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "bytes32",
+								"name": "prevHash",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "blockNum",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "message",
+								"type": "string"
+							}
+						],
+						"internalType": "struct Blockchain.Block",
+						"name": "received_block",
+						"type": "tuple"
+					}
+				],
+				"name": "finalize_block",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "propose_block",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "staking",
+				"outputs": [
+					{
+						"internalType": "contract Staking",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					}
+				],
+				"name": "user_input",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {
+				"constructor": {
+					"details": "this function starts the genesis block and manually loads some peers, letting the peers know about the in the process check out what payable does"
+				}
+			},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"node.sol": "Node"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Assigner.sol": {
+			"keccak256": "0x3c1253f8e4a74798543ee7786921b6e345acb822ffe53dfbdd5a735d126b1732",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://376606829341060133096251c38ed63086ba80b3cdeb3730e125095f3f5963a7",
+				"dweb:/ipfs/QmewibqV1GBD9dxmWZPBAGhLdrB2kCsLmWc2GHd1QhdEfp"
+			]
+		},
+		"Staking.sol": {
+			"keccak256": "0x24d89de12ccff408cce4d18c09085ea0d8b789c29a087f0f03ed25b826b6109e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4b3cebc555fced31cd9d4ff1380093726326b0c1028c6dabd71300e5ec9a8832",
+				"dweb:/ipfs/QmcPgcAGJV36DQYDPFSp5xkYk9ySb2mX1eQdxdD6QH9tt4"
+			]
+		},
+		"blockchain.sol": {
+			"keccak256": "0x19de2c88ad6d788ad08ca2d93a8739e0b8311f31f786143706f52dad40d41dfd",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d8347000ca04838bd2d17c3b6b37389d41f1e0ad01a22b4cd758a07ae628d00c",
+				"dweb:/ipfs/QmU6hYKbnnKrSXA8yxA62pYwncer7c7aXdjya54ATDdN3e"
+			]
+		},
+		"consensus.sol": {
+			"keccak256": "0x85181a695d2129f17d1c32d413ea675561a45f3efbd46077f2d73381aca29504",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3caa92d38cb89ec3b38bd91d120b378be27e70cd2b03efec7143a3f2d857a306",
+				"dweb:/ipfs/QmVTqWEC7AMUjbW6mEGzzwnqm1nbbUNt5dbSzim8rbxWzr"
+			]
+		},
+		"node.sol": {
+			"keccak256": "0xf5343b03c2dd0ad40929be288f0551197819e1c8df05f00694f43c32a4938bfb",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://000036c8d183baa149e1bf2c01d8b87ecb636ba6dde2f7b71d23c47f835e0f7c",
+				"dweb:/ipfs/QmPridXqFaAgXDb9v6zuViSSkHr88ajHDRVLVm6AHBKhp3"
+			]
+		}
+	},
+	"version": 1
+}
