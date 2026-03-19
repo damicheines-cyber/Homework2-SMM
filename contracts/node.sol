@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.30;
+pragma solidity 0.8.31;
 
 import "./consensus.sol";
 import "./blockchain.sol";
-import "./Staking.sol";
-import "./Assigner.sol";
-
+// blockchain[] and block struct are inherited from Blockchain.sol
 
 // Inherits both the blockchain and consensus mechanism
 // This is because in reality, each validator has its own copy of the blockchain and consensus engine
 contract Node is Blockchain, Consensus{
-    Staking public staking;
-    Assigner public assigner;
+
+    address public nextPeer;
     //string public current_message;
     //uint public current_block_quorum;
     //Block public current_block;
@@ -21,31 +19,31 @@ contract Node is Blockchain, Consensus{
     
     /// @dev this function starts the genesis block and manually loads some peers, letting the peers know about the in the process
     /// check out what payable does
-    constructor(
-        address[] memory list_of_addresses,
-        string memory message,
-        address _staking,
-        address _assigner
-    ) Blockchain(message) {
-
-        staking = Staking(_staking);
-        assigner = Assigner(_assigner);
-
-        uint i = list_of_addresses.length;
-        while (i>0){
-            // Get an address from the list
-            address target = list_of_addresses[i-1];
-
-            // Hard load a list of initial addresses
-            add_peer(target);
-
-            //Now let the peers know about the existence of this node
-            Node(target).add_peer(address(this));
-
-            //Move onto next address
-            i--;
+    constructor(address[] memory list_of_addresses, string memory message) Blockchain(message) {
+        if (list_of_addresses.length > 0) {
+            nextPeer = list_of_addresses[0];
         }
     }
+
+    function setNextPeer(address _nextPeer) external {
+        nextPeer = _nextPeer;
+    }
+        
+        //uint i = list_of_addresses.length;
+        //while (i>0){
+            // Get an address from the list
+           // address target = list_of_addresses[i-1];
+
+            // Hard load a list of initial addresses
+            //add_peer(target);
+
+            //Now let the peers know about the existence of this node
+            //Node(target).add_peer(address(this));
+            
+            //Move onto next address
+            //i--;
+        //}
+    //}
 
     // Nodes should be able to receive user data
     // In our very simple case, our node is only able to accept one message at a time.
@@ -55,53 +53,36 @@ contract Node is Blockchain, Consensus{
         require(converted_msg.length != 0, "Empty data requests not accepted");
 
         current_message = message;
-        current_block = build_block(current_message);
+        propagate(address(this), message);
+        //current_block = build_block(current_message);
     }
 
     // Validators are able to build and propose the next block on the chain.
-    function propose_block() external payable {
+    function propose_block() external {
 
-    // Only selected proposer can propose
-    require(msg.sender == assigner.getCurrentProposer(), "Not selected proposer");
-
-    // Require staking
-    require(msg.value >= 1 ether, "Stake required");
-
-    staking.stake{value: msg.value}();
-
-    // Request all peers for approval, gain quorum
-    uint length = current_validator_nodes.length;
-    for (uint i = 0; i < length; i++){
-        address peer = current_validator_nodes[i];
-        current_block_quorum += Node(peer).check_block(current_block);
-    }
+        // Request all peers for approval, gain quorum
+        uint length = current_validator_nodes.length;
+        for (uint i = 0; i < length; i++){
+            address peer = current_validator_nodes[i];
+            current_block_quorum += Node(peer).check_block(current_block);
+        }
     }
 
     // When blocks receive the required amount of approvals, they are added to the blockchain
     //function check_block_finality_and_build() public {
     function check_block_finality_and_build() external { //We changed check_block_finality_and_build from public to external because the function is intended to be triggered from outside the contract and is not called internally, and the modification allows it to remain callable by users while being slightly more efficient than public visibility, which we need because this function serves as an external entry point for finalizing the block after quorum is reached
-        uint totalNodes = current_validator_nodes.length;
-        // Check quorum: 2/3 rule
-        if(current_block_quorum * 3 >= totalNodes * 2){
+        // Check quorum
+        if(current_block_quorum==quorum){
             // Add block to the chain
             blockchain.push(current_block);
             next_block_num++;
-
-            // Reward proposer
-            staking.releaseStake(assigner.getCurrentProposer());
-
             // Inform other Nodes to finalize this block
             uint length = current_validator_nodes.length;
             for(uint i = 0; i < length; i++ ){
                 Node(current_validator_nodes[i]).finalize_block(current_block);
             }
-
-        } else {
-            // Slash proposer
-            staking.slashStake(assigner.getCurrentProposer());
         }
     }
-
 
     // Other nodes may send the finalize block command.
     // Check if the block conforms to th blockchain and add block
@@ -116,4 +97,17 @@ contract Node is Blockchain, Consensus{
         current_block_quorum = 0;
         delete current_block;
     }
+
+    function propagate(address originator, string memory message) public {
+        current_message = message;
+
+        if (nextPeer == originator) {
+            return;
+        }
+
+        Node(nextPeer).propagate(originator, message);
+    }
+    function getCurrentMessage() external view returns (string memory) {
+    return current_message;
+    } //just to check if the message arrived
 }
