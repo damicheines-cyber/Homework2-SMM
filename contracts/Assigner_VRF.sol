@@ -25,5 +25,19 @@ contract AssignerVRF is VRFConsumerBaseV2Plus {
 
    constructor(address vrfCoordinator) VRFConsumerBaseV2Plus(vrfCoordinator) {}
 
+   function requestRandomWords() external onlyOwner {
+    // Will revert if subscription is not set and funded.
+    s_requestId = s_vrfCoordinator.requestRandomWords(
+      VRFV2PlusClient.RandomWordsRequest({
+        keyHash: s_keyHash,
+        subId: s_subscriptionId,
+        requestConfirmations: REQUEST_CONFIRMATIONS,
+        callbackGasLimit: CALLBACK_GAS_LIMIT,
+        numWords: NUM_WORDS,
+        extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+      })
+    );
+  }
+
 
 }
