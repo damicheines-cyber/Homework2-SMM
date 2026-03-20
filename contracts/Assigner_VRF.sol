@@ -39,5 +39,19 @@ contract AssignerVRF is VRFConsumerBaseV2Plus {
     );
   }
 
+// This is the function the Oracle calls back with the answer
+    function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {
+        // : Use the random number to pick a proposer
+        // we use '%' (modulo) to get a number between 0 and the list size
+        uint256 index = randomWords[0] % nodes.length;
+
+        //  save the winner's address
+        currentProposer = nodes[index];
+    }
+
+    // function to add nodes to the list
+    function registerNode(address _node) public {
+        nodes.push(_node);
+    }
 
 }
