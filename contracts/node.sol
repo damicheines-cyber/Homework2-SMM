@@ -174,11 +174,15 @@ contract Node is Blockchain, Consensus{
             for(uint i = 0; i < length; i++ ){
                 Node(current_validator_nodes[i]).finalize_block(current_block);
             }
+            
+            // Select a new proposer after block
+            assigner.requestRandomWords();
 
         } else {
             // Slash proposer
             staking.slashStake(assigner.getCurrentProposer());
         }
+        
     }
 
     // Other nodes may send the finalize block command.
