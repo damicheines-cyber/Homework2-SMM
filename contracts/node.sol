@@ -86,6 +86,42 @@ contract Node is Blockchain, Consensus{
         return current_message;
     } // just to check if the message arrived
 
+
+    // =========================
+    // BLOCK PROPAGATION 
+    // =========================
+    function propagate(address proposer, Block memory blockData) public {
+
+        // Save block (except proposer)
+        if (address(this) != proposer) {
+            current_block = blockData;
+
+            // Validate block and send approval back
+            uint approval = this.check_block(blockData);
+            Node(proposer).receiveApproval(approval);
+        }
+
+        // Stop when full circle reached
+        if (nextPeer == proposer) {
+
+            // Trigger finalization on proposer
+            Node(proposer).check_block_finality_and_build();
+
+            return;
+        } 
+
+    //  Pass block to next node
+    Node(nextPeer).propagate(proposer, blockData);
+}
+
+    // =========================
+    // RECEIVE APPROVALS
+    // =========================
+
+    function receiveApproval(uint approval) external {
+        current_block_quorum += approval;
+    }
+  
     // =========================
     // BLOCK PROPOSAL (PoS logic)
     // =========================
@@ -103,12 +139,19 @@ contract Node is Blockchain, Consensus{
 
         staking.stake{value: msg.value}();
 
-        // Request all peers for approval, gain quorum
-        uint length = current_validator_nodes.length;
-        for (uint i = 0; i < length; i++){
-            address peer = current_validator_nodes[i];
-            current_block_quorum += Node(peer).check_block(current_block);
-        }
+        //Request all peers for approval, gain quorum
+        // uint length = current_validator_nodes.length;
+        // for (uint i = 0; i < length; i++){
+            //address peer = current_validator_nodes[i];
+            //current_block_quorum += Node(peer).check_block(current_block);
+        //}
+
+        // Proposer validates its own block
+        current_block_quorum = this.check_block(current_block);
+
+        // Start propagation of the block
+        propagate(address(this), current_block);
+
     }
 
     // When blocks receive the required amount of approvals, they are added to the blockchain
